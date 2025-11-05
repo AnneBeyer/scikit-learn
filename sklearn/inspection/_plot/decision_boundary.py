@@ -216,6 +216,9 @@ class DecisionBoundaryDisplay:
         if ax is None:
             _, ax = plt.subplots()
 
+        ax.set_xlim((self.xx0.min(), self.xx0.max()))
+        ax.set_ylim((self.xx1.min(), self.xx1.max()))
+
         plot_func = getattr(ax, plot_method)
         if self.response.ndim == 2:
             self.surface_ = plot_func(self.xx0, self.xx1, self.response, **kwargs)
