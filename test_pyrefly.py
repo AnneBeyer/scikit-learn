@@ -4,6 +4,6 @@
 import numpy as np
 
 
-def tes_function(i):
+def test_function(i) -> int:
     a = np.random.randint
-    return None
+    return a
