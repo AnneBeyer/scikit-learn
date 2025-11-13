@@ -208,11 +208,12 @@ ban-relative-imports = "all"
 project-includes = ["**/sklearn*"]
 project-excludes = ["**/sklearn/externals*"]
 # mimics mypy's ignore-missing-imports:
-replace_imports_with_any = ["sklearn.*"]
+ignore-missing-imports = []
+#replace_imports_with_any = ["sklearn.*"]
+
 # By default, mypy does not check unannotated function bodies.
 # The following flag will configure Pyrefly to match mypy's behavior:
-untyped_def_behavior = "skip-and-infer-return-any"
-
+untyped_def_behavior = "skip-and-infer-return-any" #"check-and-infer-return-type"
 
 # [tool.mypy]
 # ignore_missing_imports = true
