@@ -208,7 +208,7 @@ ban-relative-imports = "all"
 project-includes = ["**/sklearn*"]
 project-excludes = ["**/sklearn/externals*"]
 # mimics mypy's ignore-missing-imports:
-ignore-missing-imports = []
+ignore-missing-imports = ["*"]
 #replace_imports_with_any = ["sklearn.*"]
 
 # By default, mypy does not check unannotated function bodies.
