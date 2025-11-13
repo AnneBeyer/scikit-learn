@@ -505,17 +505,17 @@ class DecisionBoundaryDisplay:
                         f"`{name}` must be a tuple of (min, max) with min < max"
                     )
 
-        x0, x1 = _safe_indexing(X, 0, axis=1), _safe_indexing(X, 1, axis=1)
-
         # Use provided xlim/ylim params or calculate from data
         if xlim is not None:
             x0_min, x0_max = xlim
         else:
+            x0 = _safe_indexing(X, 0, axis=1)
             x0_min, x0_max = x0.min() - eps, x0.max() + eps
 
         if ylim is not None:
             x1_min, x1_max = ylim
         else:
+            x1 = _safe_indexing(X, 1, axis=1)
             x1_min, x1_max = x1.min() - eps, x1.max() + eps
 
         xx0, xx1 = np.meshgrid(
