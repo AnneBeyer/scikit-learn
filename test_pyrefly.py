@@ -1,6 +1,9 @@
 # Authors: The scikit-learn developers
 # SPDX-License-Identifier: BSD-3-Clause
 
+import numpy as np
+
 
 def tes_function(i) -> int:
-    return 0
+    a = np.random.randint
+    return a
