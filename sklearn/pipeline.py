@@ -10,7 +10,12 @@ from itertools import chain, islice
 import numpy as np
 from scipy import sparse
 
-from sklearn.base import TransformerMixin, _fit_context, clone
+from sklearn.base import (
+    TransformerMixin,
+    _fit_context,
+    _is_estimator_like_instance,
+    clone,
+)
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.utils import Bunch
@@ -300,27 +305,23 @@ class Pipeline(_BaseComposition):
         estimator = estimators[-1]
 
         for t in transformers:
-            if t is None or t == "passthrough":
-                continue
-            if not (hasattr(t, "fit") or hasattr(t, "fit_transform")) or not hasattr(
-                t, "transform"
+            if not _is_estimator_like_instance(
+                t, valid_options=[None, "passthrough"], estimator_type="transformer"
             ):
                 raise TypeError(
                     "All intermediate steps should be "
                     "transformers and implement fit and transform "
-                    "or be the string 'passthrough' "
+                    "or be the string 'passthrough' or None. "
                     "'%s' (type %s) doesn't" % (t, type(t))
                 )
 
         # We allow last estimator to be None as an identity transformation
-        if (
-            estimator is not None
-            and estimator != "passthrough"
-            and not hasattr(estimator, "fit")
+        if not _is_estimator_like_instance(
+            estimator, valid_options=[None, "passthrough"], estimator_type="estimator"
         ):
             raise TypeError(
                 "Last step of Pipeline should implement fit "
-                "or be the string 'passthrough'. "
+                "or be the string 'passthrough' or None. "
                 "'%s' (type %s) doesn't" % (estimator, type(estimator))
             )
 
@@ -1699,14 +1700,13 @@ class FeatureUnion(TransformerMixin, _BaseComposition):
 
         # validate estimators
         for t in transformers:
-            if t in ("drop", "passthrough"):
-                continue
-            if not (hasattr(t, "fit") or hasattr(t, "fit_transform")) or not hasattr(
-                t, "transform"
+            if not _is_estimator_like_instance(
+                t, valid_options=["drop", "passthrough"], estimator_type="transformer"
             ):
                 raise TypeError(
                     "All estimators should implement fit and "
-                    "transform. '%s' (type %s) doesn't" % (t, type(t))
+                    "transform or be the string 'drop' or 'passthrough'. "
+                    "'%s' (type %s) doesn't" % (t, type(t))
                 )
 
     def _validate_transformer_weights(self):

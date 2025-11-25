@@ -9,6 +9,7 @@ import inspect
 import platform
 import re
 import warnings
+from abc import ABCMeta
 from collections import defaultdict
 
 import numpy as np
@@ -1338,3 +1339,37 @@ def _fit_context(*, prefer_skip_nested_validation):
         return wrapper
 
     return decorator
+
+
+def _is_estimator_like_instance(
+    estimator, valid_options=[], estimator_type="transformer"
+):
+    """Return True if the given object behaves like an estimator.
+
+    Raises an error if the estimator is a meta class and not an instance and tests
+    if it is among the valid options or implements the required methods.
+
+    Parameters
+    ----------
+    estimator instance
+        Estimator object to test.
+
+    Returns
+    -------
+    out : bool
+        True if the object behaves like a valid estimator, false otherwise.
+    """
+    if type(estimator) in [ABCMeta, type]:
+        raise TypeError(
+            f"Expected an estimator instance ({estimator.__name__}()), "
+            f"received an estimator class ({estimator.__name__}). "
+        )
+    if estimator in valid_options:
+        return True
+    if estimator_type == "transformer":
+        return (
+            hasattr(estimator, "fit") or hasattr(estimator, "fit_transform")
+        ) and hasattr(estimator, "transform")
+    elif estimator_type == "estimator":
+        return hasattr(estimator, "fit")
+    return False

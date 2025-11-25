@@ -16,7 +16,12 @@ from numbers import Integral, Real
 import numpy as np
 from scipy import sparse
 
-from sklearn.base import TransformerMixin, _fit_context, clone
+from sklearn.base import (
+    TransformerMixin,
+    _fit_context,
+    _is_estimator_like_instance,
+    clone,
+)
 from sklearn.pipeline import _fit_transform_one, _name_estimators, _transform_one
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.utils import Bunch
@@ -514,10 +519,8 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):
 
         # validate estimators
         for t in transformers:
-            if t in ("drop", "passthrough"):
-                continue
-            if not (hasattr(t, "fit") or hasattr(t, "fit_transform")) or not hasattr(
-                t, "transform"
+            if not _is_estimator_like_instance(
+                t, valid_options=["drop", "passthrough"], estimator_type="transformer"
             ):
                 # Used to validate the transformers in the `transformers` list
                 raise TypeError(
