@@ -282,6 +282,16 @@ def test_pipeline_invalid_parameters():
     assert params == params2
 
 
+def test_class_pipeline_steps_raises_class_vs_instance():
+    X = iris.data
+    y = iris.target
+
+    pipe = Pipeline([("svc", SVC)])
+    msg = "Expected an estimator instance (.*()), received an estimator class (.*)"
+    with pytest.raises(TypeError, match=msg):
+        pipe.fit(X, y)
+
+
 def test_empty_pipeline():
     X = iris.data
     y = iris.target
@@ -754,7 +764,7 @@ def test_set_pipeline_steps():
     # With invalid data
     pipeline.set_params(steps=[("junk", ())])
     msg = re.escape(
-        "Last step of Pipeline should implement fit or be the string 'passthrough'."
+        "Last step of Pipeline should implement fit or be the string 'passthrough'"
     )
     with pytest.raises(TypeError, match=msg):
         pipeline.fit([[1]], [1])
