@@ -1321,6 +1321,16 @@ def _fit_context(*, prefer_skip_nested_validation):
         def wrapper(estimator, *args, **kwargs):
             global_skip_validation = get_config()["skip_parameter_validation"]
 
+            if isinstance(estimator, np.ndarray):
+                raise TypeError(
+                    "Got numpy.ndarray as estimator. Something weird is happening here."
+                )
+            if type(estimator) in [ABCMeta, type]:
+                raise TypeError(
+                    f"Expected an estimator instance ({estimator.__name__}()), "
+                    f"received an estimator class ({estimator.__name__}). "
+                )
+
             # we don't want to validate again for each call to partial_fit
             partial_fit_and_fitted = (
                 fit_method.__name__ == "partial_fit" and _is_fitted(estimator)
