@@ -313,6 +313,13 @@ def _wrap_method_output(f, method):
 
     @wraps(f)
     def wrapped(self, X, *args, **kwargs):
+        if isinstance(self, np.ndarray):
+            raise TypeError(
+                f"Can't call '{f.__name__}' on an estimator class. "
+                "You should provide an instance of scikit-learn estimator "
+                "instead of a class."
+            )
+
         data_to_wrap = f(self, X, *args, **kwargs)
         if isinstance(data_to_wrap, tuple):
             # only wrap the first output for cross decomposition

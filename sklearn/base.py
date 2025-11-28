@@ -1318,6 +1318,13 @@ def _fit_context(*, prefer_skip_nested_validation):
     def decorator(fit_method):
         @functools.wraps(fit_method)
         def wrapper(estimator, *args, **kwargs):
+            if isinstance(estimator, np.ndarray):
+                raise TypeError(
+                    f"Can't call '{fit_method.__name__}' on an estimator class. "
+                    "You should provide an instance of scikit-learn estimator "
+                    "instead of a class."
+                )
+
             global_skip_validation = get_config()["skip_parameter_validation"]
 
             # we don't want to validate again for each call to partial_fit
