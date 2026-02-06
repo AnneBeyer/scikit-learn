@@ -38,10 +38,6 @@ def _check_boundary_response_method(estimator, response_method):
     prediction_method : list of str or str
         The name or list of names of the response methods to use.
     """
-    has_classes = hasattr(estimator, "classes_")
-    if has_classes and _is_arraylike_not_scalar(estimator.classes_[0]):
-        msg = "Multi-label and multi-output multi-class classifiers are not supported"
-        raise ValueError(msg)
 
     if response_method == "auto":
         if is_regressor(estimator):
@@ -239,15 +235,17 @@ class DecisionBoundaryDisplay:
         if plot_method not in ("contourf", "contour", "pcolormesh"):
             raise ValueError(
                 "plot_method must be 'contourf', 'contour', or 'pcolormesh'. "
-                f"Got {plot_method} instead."
+                f"Got '{plot_method}' instead."
             )
 
         if ax is None:
             _, ax = plt.subplots()
 
         plot_func = getattr(ax, plot_method)
+
         if self.n_classes == 2:
             self.surface_ = plot_func(self.xx0, self.xx1, self.response, **kwargs)
+
         else:  # multiclass
             for kwarg in ("cmap", "colors"):
                 if kwarg in kwargs:
@@ -257,29 +255,46 @@ class DecisionBoundaryDisplay:
                     )
                     del kwargs[kwarg]
 
-            if self.multiclass_colors is None or isinstance(
-                self.multiclass_colors, str
-            ):
-                if self.multiclass_colors is None:
-                    cmap = "tab10" if self.n_classes <= 10 else "gist_rainbow"
-                else:
-                    cmap = self.multiclass_colors
+            if self.multiclass_colors is None:
+                self.multiclass_colors = (
+                    "tab10" if self.n_classes <= 10 else "gist_rainbow"
+                )
 
+            if isinstance(self.multiclass_colors, str):
+                if self.multiclass_colors not in mpl.pyplot.colormaps():
+                    raise ValueError(
+                        "When 'multiclass_colors' is a string, it must be a valid "
+                        f"Matplotlib colormap. Got: {self.multiclass_colors}"
+                    )
                 # Special case for the tab10 and tab20 colormaps that encode a
                 # discrete set of colors that are easily distinguishable
                 # contrary to other colormaps that are continuous.
-                if cmap == "tab10" and self.n_classes <= 10:
+                if self.multiclass_colors == "tab10" and self.n_classes <= 10:
                     colors = plt.get_cmap("tab10", 10).colors[: self.n_classes]
-                elif cmap == "tab20" and self.n_classes <= 20:
+                elif self.multiclass_colors == "tab20" and self.n_classes <= 20:
                     colors = plt.get_cmap("tab20", 20).colors[: self.n_classes]
                 else:
-                    cmap = plt.get_cmap(cmap, self.n_classes)
+                    cmap = plt.get_cmap(self.multiclass_colors, self.n_classes)
                     if not hasattr(cmap, "colors"):
                         # Get `LinearSegmentedColormap` for non-qualitative cmaps
                         colors = cmap(np.linspace(0, 1, self.n_classes))
                     else:
                         colors = cmap.colors
+
             elif isinstance(self.multiclass_colors, list):
+                if len(self.multiclass_colors) != self.n_classes:
+                    raise ValueError(
+                        "When 'multiclass_colors' is a list, it must be of the same "
+                        f"length as 'estimator.classes_' ({self.n_classes}), got: "
+                        f"{len(self.multiclass_colors)}."
+                    )
+                elif any(
+                    not mpl.colors.is_color_like(col) for col in self.multiclass_colors
+                ):
+                    raise ValueError(
+                        "When 'multiclass_colors' is a list, it can only contain valid"
+                        f" Matplotlib color names. Got: {self.multiclass_colors}"
+                    )
                 colors = [mpl.colors.to_rgba(color) for color in self.multiclass_colors]
             else:
                 raise ValueError("'multiclass_colors' must be a list or a str.")
@@ -474,9 +489,7 @@ class DecisionBoundaryDisplay:
         <...>
         >>> plt.show()
         """
-        check_matplotlib_support(f"{cls.__name__}.from_estimator")
         check_is_fitted(estimator)
-        import matplotlib as mpl
 
         if not grid_resolution > 1:
             raise ValueError(
@@ -489,46 +502,26 @@ class DecisionBoundaryDisplay:
                 f"eps must be greater than or equal to 0. Got {eps} instead."
             )
 
-        possible_plot_methods = ("contourf", "contour", "pcolormesh")
-        if plot_method not in possible_plot_methods:
-            available_methods = ", ".join(possible_plot_methods)
-            raise ValueError(
-                f"plot_method must be one of {available_methods}. "
-                f"Got {plot_method} instead."
-            )
-
         num_features = _num_features(X)
         if num_features != 2:
             raise ValueError(
                 f"n_features must be equal to 2. Got {num_features} instead."
             )
 
-        if (
-            response_method in ("predict_proba", "decision_function", "auto")
-            and multiclass_colors is not None
-            and hasattr(estimator, "classes_")
-            and (n_classes := len(estimator.classes_)) > 2
-        ):
-            if isinstance(multiclass_colors, list):
-                if len(multiclass_colors) != n_classes:
-                    raise ValueError(
-                        "When 'multiclass_colors' is a list, it must be of the same "
-                        f"length as 'estimator.classes_' ({n_classes}), got: "
-                        f"{len(multiclass_colors)}."
-                    )
-                elif any(
-                    not mpl.colors.is_color_like(col) for col in multiclass_colors
-                ):
-                    raise ValueError(
-                        "When 'multiclass_colors' is a list, it can only contain valid"
-                        f" Matplotlib color names. Got: {multiclass_colors}"
-                    )
-            if isinstance(multiclass_colors, str):
-                if multiclass_colors not in mpl.pyplot.colormaps():
-                    raise ValueError(
-                        "When 'multiclass_colors' is a string, it must be a valid "
-                        f"Matplotlib colormap. Got: {multiclass_colors}"
-                    )
+        if hasattr(estimator, "classes_"):
+            if _is_arraylike_not_scalar(estimator.classes_[0]):
+                raise ValueError(
+                    "Multi-label and multi-output multi-class classifiers are not "
+                    "supported"
+                )
+            if (
+                class_of_interest is not None
+                and class_of_interest not in estimator.classes_
+            ):
+                raise ValueError(
+                    f"class_of_interest={class_of_interest} is not a valid label: It "
+                    f"should be one of {estimator.classes_}"
+                )
 
         x0, x1 = _safe_indexing(X, 0, axis=1), _safe_indexing(X, 1, axis=1)
 
@@ -550,26 +543,13 @@ class DecisionBoundaryDisplay:
             )
 
         prediction_method = _check_boundary_response_method(estimator, response_method)
-        try:
-            response, _, response_method_used = _get_response_values(
-                estimator,
-                X_grid,
-                response_method=prediction_method,
-                pos_label=class_of_interest,
-                return_response_method_used=True,
-            )
-        except ValueError as exc:
-            if "is not a valid label" in str(exc):
-                # re-raise a more informative error message since `pos_label` is unknown
-                # to our user when interacting with
-                # `DecisionBoundaryDisplay.from_estimator`
-                raise ValueError(
-                    # Note: it is ok to use estimator.classes_ here, as this error will
-                    # only be thrown if estimator is a classifier
-                    f"class_of_interest={class_of_interest} is not a valid label: It "
-                    f"should be one of {estimator.classes_}"
-                ) from exc
-            raise
+        response, _, response_method_used = _get_response_values(
+            estimator,
+            X_grid,
+            response_method=prediction_method,
+            pos_label=class_of_interest,
+            return_response_method_used=True,
+        )
 
         # convert classes predictions into integers
         if response_method_used == "predict" and hasattr(estimator, "classes_"):
@@ -577,7 +557,7 @@ class DecisionBoundaryDisplay:
             encoder.classes_ = estimator.classes_
             response = encoder.transform(response)
 
-        # infer n_classes from the estimator
+        # infer n_classes from the estimator or the response values.
         if (
             class_of_interest is not None
             or is_regressor(estimator)

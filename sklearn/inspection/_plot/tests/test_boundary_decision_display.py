@@ -59,19 +59,6 @@ def test_input_data_dimension(pyplot):
         DecisionBoundaryDisplay.from_estimator(estimator=clf, X=X)
 
 
-def test_check_boundary_response_method_error():
-    """Check error raised for multi-output multi-class classifiers by
-    `_check_boundary_response_method`.
-    """
-
-    class MultiLabelClassifier:
-        classes_ = [np.array([0, 1]), np.array([0, 1])]
-
-    err_msg = "Multi-label and multi-output multi-class classifiers are not supported"
-    with pytest.raises(ValueError, match=err_msg):
-        _check_boundary_response_method(MultiLabelClassifier(), "predict")
-
-
 @pytest.mark.parametrize(
     "estimator, response_method, expected_prediction_method",
     [
@@ -145,8 +132,8 @@ def test_multiclass_predict(pyplot):
     [
         (
             {"plot_method": "hello_world"},
-            r"plot_method must be one of contourf, contour, pcolormesh. Got hello_world"
-            r" instead.",
+            r"plot_method must be 'contourf', 'contour', or 'pcolormesh'. Got "
+            r"'hello_world' instead.",
         ),
         (
             {"grid_resolution": 1},
