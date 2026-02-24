@@ -670,7 +670,12 @@ def test_multiclass_colors_cmap(
     if response_method == "predict":
         cmap = mpl.colors.ListedColormap(colors)
         assert disp.surface_.cmap == cmap
-    elif plot_method != "contour":
+
+    else:
+        if plot_method == "contour":
+            # the last display contains all class boundary contours
+            assert_allclose(disp.surface_[-1].colors, colors)
+            del disp.surface_[-1]
         cmaps = [
             mpl.colors.LinearSegmentedColormap.from_list(
                 f"colormap_{class_idx}", [(1.0, 1.0, 1.0, 1.0), (r, g, b, 1.0)]
@@ -682,8 +687,6 @@ def test_multiclass_colors_cmap(
 
         for idx, quad in enumerate(disp.surface_):
             assert quad.cmap == cmaps[idx]
-    else:
-        assert_allclose(disp.surface_.colors, colors)
 
 
 @pytest.mark.parametrize("y", [np.arange(6), [str(i) for i in np.arange(6)]])
@@ -710,12 +713,14 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
         plot_method=plot_method,
     )
 
-    if plot_method == "contour":
-        expected_levels = np.arange(6)
-    else:
-        expected_levels = np.arange(7) - 0.5
+    expected_levels = np.arange(6) if plot_method == "contour" else np.arange(7)
 
-    assert np.array_equal(disp.surface_.levels, expected_levels)
+    if isinstance(disp.surface_, list):
+        levels = disp.surface_[-1].levels
+    else:
+        levels = disp.surface_.levels
+
+    assert np.array_equal(levels, expected_levels)
 
 
 # estimator classes for non-regression test cases for issue #33194
