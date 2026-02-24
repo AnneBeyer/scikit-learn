@@ -226,6 +226,11 @@ class DecisionBoundaryDisplay:
             Additional keyword arguments to be passed to the `plot_method`. For
             :term:`binary` problems, `cmap` or `colors` can be set here to specify the
             colormap or colors, otherwise the default colormap ('viridis') is used.
+            If not specified by the user, `zorder` is set to -1 to ensure that the
+            decision boundary is plotted in the background (in case a scatter plot is
+            added on top) and `antialiased` is set to `True` to smooth the
+            lines for multiclass `contour` (for all `response methods`) and `contourf`
+            (only with `predict`).
 
         Returns
         -------
@@ -286,33 +291,13 @@ class DecisionBoundaryDisplay:
 
             self.multiclass_colors_ = colors
 
-            if self.response.ndim == 2:  # predict
-                # Set `levels` to ensure all classes are displayed in different colors
-                if "levels" not in kwargs:
-                    if plot_method == "contour":
-                        kwargs["levels"] = np.arange(self.n_classes)
-                    elif plot_method == "contourf":
-                        kwargs["levels"] = np.arange(self.n_classes + 1) - 0.5
-                # `pcolormesh` requires cmap, for the others it makes no difference
-                cmap = mpl.colors.ListedColormap(colors)
-                self.surface_ = plot_func(
-                    self.xx0, self.xx1, self.response, cmap=cmap, **kwargs
-                )
+            # If not set by the user, set default values for `zorder` to ensure that the
+            # decision boundary is plotted in the background (in case a scatter plot is
+            # added on top)
+            if "zorder" not in kwargs:
+                kwargs["zorder"] = -1
 
-            # predict_proba and decision_function differ for plotting methods
-            elif plot_method == "contour":
-                # Set `levels` to ensure all classes are displayed in different colors
-                if "levels" not in kwargs:
-                    kwargs["levels"] = np.arange(self.n_classes)
-                # Plot only integer class values
-                self.surface_ = plot_func(
-                    self.xx0,
-                    self.xx1,
-                    self.response.argmax(axis=2),
-                    colors=colors,
-                    **kwargs,
-                )
-            else:
+            if self.response.ndim == 3:  # predict_proba and decision_function
                 multiclass_cmaps = [
                     mpl.colors.LinearSegmentedColormap.from_list(
                         f"colormap_{class_idx}",
@@ -329,6 +314,39 @@ class DecisionBoundaryDisplay:
                     self.surface_.append(
                         plot_func(self.xx0, self.xx1, response, cmap=cmap, **kwargs)
                     )
+
+                if plot_method == "contour":
+                    # Additionally plot the decision boundaries between classes.
+                    # Set `levels` to ensure all boundaries are displayed.
+                    if "levels" not in kwargs:
+                        kwargs["levels"] = np.arange(self.n_classes)
+                    if "antialiased" not in kwargs:
+                        kwargs["antialiased"] = True
+                    self.surface_.append(
+                        plot_func(
+                            self.xx0,
+                            self.xx1,
+                            self.response.argmax(axis=2),
+                            colors=colors,
+                            **kwargs,
+                        )
+                    )
+
+            elif self.response.ndim == 2:  # predict
+                # Set `levels` to ensure all classes are displayed in different colors
+                if "levels" not in kwargs:
+                    if plot_method == "contour":
+                        kwargs["levels"] = np.arange(self.n_classes)
+                    elif plot_method == "contourf":
+                        kwargs["levels"] = np.arange(self.n_classes + 1) - 0.5
+                # Smooth lines if not specified otherwise
+                if plot_method != "pcolormesh" and "antialiased" not in kwargs:
+                    kwargs["antialiased"] = True
+                # `pcolormesh` requires cmap, for the others it makes no difference
+                cmap = mpl.colors.ListedColormap(colors)
+                self.surface_ = plot_func(
+                    self.xx0, self.xx1, self.response, cmap=cmap, **kwargs
+                )
 
         if xlabel is not None or not ax.get_xlabel():
             xlabel = self.xlabel if xlabel is None else xlabel
