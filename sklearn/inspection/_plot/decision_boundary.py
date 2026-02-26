@@ -317,18 +317,18 @@ class DecisionBoundaryDisplay:
 
                 if plot_method == "contour":
                     # Additionally plot the decision boundaries between classes.
-                    # Set `levels` to ensure all boundaries are displayed.
-                    if "levels" not in kwargs:
-                        kwargs["levels"] = np.arange(self.n_classes)
-                    if "antialiased" not in kwargs:
-                        kwargs["antialiased"] = True
                     self.surface_.append(
                         plot_func(
                             self.xx0,
                             self.xx1,
                             self.response.argmax(axis=2),
-                            colors=colors,
-                            **kwargs,
+                            colors="k",
+                            linewidths=0.5,
+                            alpha=0.5,
+                            # make lines smoother
+                            antialiased=True,
+                            # Set `levels` to ensure all boundaries are displayed.
+                            levels=np.arange(self.n_classes),
                         )
                     )
 
