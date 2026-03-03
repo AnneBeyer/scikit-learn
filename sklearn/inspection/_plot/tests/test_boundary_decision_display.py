@@ -700,8 +700,10 @@ def test_multiclass_colors_cmap(
     ],
 )
 def test_multiclass_levels(pyplot, y, response_method, plot_method):
-    # non-regression test for issue #32866
+    """Non-regression test for issue #32866.
 
+    Levels are only relevant for "contour" and "predict" with "contourf".
+    """
     X = np.array([[-1, -1], [-2, -1], [1, 1], [2, 1], [2, 2], [3, 2]])
 
     clf = LogisticRegression().fit(X, y)
@@ -713,14 +715,20 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
         plot_method=plot_method,
     )
 
-    expected_levels = np.arange(6) if plot_method == "contour" else np.arange(7)
+    if plot_method == "contour":
+        expected_levels = np.arange(6)
+    else:
+        expected_levels = np.arange(7) - 0.5
 
     if isinstance(disp.surface_, list):
+        # "decision_function" and "predict_proba" with "contour" have a separate surface
+        # for each class contour, and the decision boundaries (which require the correct
+        # levels) are added on the last surface
         levels = disp.surface_[-1].levels
     else:
         levels = disp.surface_.levels
 
-    assert np.array_equal(levels, expected_levels)
+    assert_allclose(levels, expected_levels)
 
 
 # estimator classes for non-regression test cases for issue #33194
