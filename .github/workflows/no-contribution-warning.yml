@@ -39,8 +39,8 @@ jobs:
     steps:
       - name: Remove no-contribution warning
         run: |
-          has_needs_label="$(gh issue view "$ISSUE_NUMBER" --json labels --jq '.labels[].name | select(startswith("Needs"))' | head -n 1)"
-          if [[ -z "$has_needs_label" ]]; then
+          still_has_needs_labels="$(gh issue view "$ISSUE_NUMBER" --json labels --jq '.labels[].name | select(startswith("Needs"))' | head -n 1)"
+          if [[ -z "$still_has_needs_labels" ]]; then
             body="$(gh issue view "$ISSUE_NUMBER" --json body --jq .body)"
             if [[ "$body" == "$WARNING_MESSAGE"* ]]; then
               new_body="${body#"$WARNING_MESSAGE"}"
