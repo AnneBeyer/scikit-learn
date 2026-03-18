@@ -173,8 +173,8 @@ class DecisionBoundaryDisplay:
           `color <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
           strings, of length `n_classes`
         * str: name of :class:`matplotlib.colors.Colormap`
-        * None: 'tab10' colormap is used to sample colors if the number of
-          classes is less than or equal to 10, otherwise 'gist_rainbow' colormap.
+        * None: 'tab10' colormap is used to sample colors if the number of classes is
+          less than or equal to 10, otherwise 'gist_rainbow' colormap.
 
         Single color (fading to white) colormaps will be generated from the colors in
         the list or colors taken from the colormap, and passed to the `cmap` parameter
@@ -386,6 +386,14 @@ class DecisionBoundaryDisplay:
                         kwargs["levels"] = np.arange(self.n_classes)
                     elif plot_method == "contourf":
                         kwargs["levels"] = np.arange(self.n_classes + 1) - 0.5
+                else:
+                    warnings.warn(
+                        "Setting `levels` manually is not recommended. "
+                        "The Display class will take care of setting them such that "
+                        "all boundaries are displayed correctly.",
+                        UserWarning,
+                    )
+
                 if plot_method == "contour":
                     self.surface_ = plot_func(
                         self.xx0, self.xx1, self.response, colors="black", **kwargs
