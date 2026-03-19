@@ -27,8 +27,11 @@ jobs:
           python-version: '3.13'
       - name: Install PyGithub
         run: pip install -Uq PyGithub
-      - name: Checkout repository
+      - name: Checkout workflow script
         uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github/scripts/add_or_remove_no_pr_warning.py
+          sparse-checkout-cone-mode: false # false for files/ true for directories
       - name: Add not-ready-for-PR warning
         run: python .github/scripts/add_or_remove_no_pr_warning.py --mode="add"
 
@@ -42,7 +45,10 @@ jobs:
           python-version: '3.13'
       - name: Install PyGithub
         run: pip install -Uq PyGithub
-      - name: Checkout repository
+      - name: Checkout workflow script
         uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github/scripts/add_or_remove_no_pr_warning.py
+          sparse-checkout-cone-mode: false # false for files/ true for directories
       - name: Remove not-ready-for-PR warning
         run: python .github/scripts/add_or_remove_no_pr_warning.py --mode="remove"
