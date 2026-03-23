@@ -98,9 +98,9 @@ def _select_colors(mpl, multiclass_colors, n_classes):
                 "'multiclass_colors'."
             )
         if cmap.N < 256:
-            # Special case for the qualitative colormaps that encode a discrete set of
-            # colors that are easily distinguishable, contrary to other colormaps that
-            # are continuous (for which `cmap.N` >= 256).
+            # Special case for the qualitative colormaps that encode a
+            # discrete set of colors that are easily distinguishable, contrary to other
+            # colormaps that are continuous (for which `cmap.N` >= 256).
             return mpl.colors.to_rgba_array(cmap.colors[:n_classes])
         else:
             return cmap(np.linspace(0, 1, n_classes))
@@ -127,8 +127,9 @@ class DecisionBoundaryDisplay:
     """Decisions boundary visualization.
 
     It is recommended to use
-    :func:`~sklearn.inspection.DecisionBoundaryDisplay.from_estimator` to create a
-    :class:`DecisionBoundaryDisplay`. All parameters are stored as attributes.
+    :func:`~sklearn.inspection.DecisionBoundaryDisplay.from_estimator`
+    to create a :class:`DecisionBoundaryDisplay`. All parameters are stored as
+    attributes.
 
     Read more in the :ref:`User Guide <visualizations>`.
 
@@ -173,8 +174,8 @@ class DecisionBoundaryDisplay:
           `color <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
           strings, of length `n_classes`
         * str: name of :class:`matplotlib.colors.Colormap`
-        * None: 'tab10' colormap is used to sample colors if the number of classes is
-          less than or equal to 10, otherwise 'gist_rainbow' colormap.
+        * None: 'tab10' colormap is used to sample colors if the number of
+          classes is less than or equal to 10, otherwise 'gist_rainbow' colormap.
 
         Single color (fading to white) colormaps will be generated from the colors in
         the list or colors taken from the colormap, and passed to the `cmap` parameter
@@ -204,12 +205,13 @@ class DecisionBoundaryDisplay:
     ----------
     surface_ : matplotlib `QuadContourSet` or `QuadMesh` or list of such objects
         If `plot_method` is 'contour' or 'contourf', `surface_` is
-        :class:`QuadContourSet <matplotlib.contour.QuadContourSet>`. If `plot_method` is
-        'pcolormesh', `surface_` is :class:`QuadMesh <matplotlib.collections.QuadMesh>`.
+        :class:`QuadContourSet <matplotlib.contour.QuadContourSet>`. If
+        `plot_method` is 'pcolormesh', `surface_` is
+        :class:`QuadMesh <matplotlib.collections.QuadMesh>`.
 
     multiclass_colors_ : array of shape (n_classes, 4)
-        Colors used to plot each class in multiclass problems. Only defined when
-        `n_classes` > 2.
+        Colors used to plot each class in multiclass problems.
+        Only defined when `n_classes` > 2.
 
         .. versionadded:: 1.7
 
@@ -280,14 +282,15 @@ class DecisionBoundaryDisplay:
         Parameters
         ----------
         plot_method : {'contourf', 'contour', 'pcolormesh'}, default='contourf'
-            Plotting method to call when plotting the response. Please refer to the
-            following matplotlib documentation for details:
+            Plotting method to call when plotting the response. Please refer
+            to the following matplotlib documentation for details:
             :func:`contourf <matplotlib.pyplot.contourf>`,
             :func:`contour <matplotlib.pyplot.contour>`,
             :func:`pcolormesh <matplotlib.pyplot.pcolormesh>`.
 
         ax : Matplotlib axes, default=None
-            Axes object to plot on. If `None`, a new figure and axes is created.
+            Axes object to plot on. If `None`, a new figure and axes is
+            created.
 
         xlabel : str, default=None
             Overwrite the x-axis label.
@@ -446,25 +449,27 @@ class DecisionBoundaryDisplay:
             Input data that should be only 2-dimensional.
 
         grid_resolution : int, default=100
-            Number of grid points to use for plotting decision boundary. Higher values
-            will make the plot look nicer but be slower to render.
+            Number of grid points to use for plotting decision boundary.
+            Higher values will make the plot look nicer but be slower to
+            render.
 
         eps : float, default=1.0
-            Extends the minimum and maximum values of X for evaluating the response
-            function.
+            Extends the minimum and maximum values of X for evaluating the
+            response function.
 
         plot_method : {'contourf', 'contour', 'pcolormesh'}, default='contourf'
-            Plotting method to call when plotting the response. Please refer to the
-            following matplotlib documentation for details:
+            Plotting method to call when plotting the response. Please refer
+            to the following matplotlib documentation for details:
             :func:`contourf <matplotlib.pyplot.contourf>`,
             :func:`contour <matplotlib.pyplot.contour>`,
             :func:`pcolormesh <matplotlib.pyplot.pcolormesh>`.
 
         response_method : {'auto', 'decision_function', 'predict_proba', \
                 'predict'}, default='auto'
-            Specifies whether to use :term:`decision_function`, :term:`predict_proba` or
-            :term:`predict` as the target response. If set to 'auto', the response
-            method is tried in the order as listed above.
+            Specifies whether to use :term:`decision_function`,
+            :term:`predict_proba` or :term:`predict` as the target response.
+            If set to 'auto', the response method is tried in the order as
+            listed above.
 
             .. versionchanged:: 1.6
                 For multiclass problems, 'auto' no longer defaults to 'predict'.
@@ -474,8 +479,8 @@ class DecisionBoundaryDisplay:
             `estimator.classes_[1]` is considered the positive class. For
             :term:`multiclass` classifiers, if None, all classes will be represented in
             the decision boundary plot; when `response_method` is :term:`predict_proba`
-            or :term:`decision_function`, the class with the highest response value at
-            each point is plotted. The color of each class can be set via
+            or :term:`decision_function`, the class with the highest response value
+            at each point is plotted. The color of each class can be set via
             `multiclass_colors`.
 
             .. versionadded:: 1.4
@@ -491,7 +496,8 @@ class DecisionBoundaryDisplay:
               strings, of length `n_classes`
             * str: name of :class:`matplotlib.colors.Colormap`
             * None: 'tab10' colormap is used to sample colors if the number of
-                classes is less than or equal to 10, otherwise 'gist_rainbow' colormap.
+                classes is less than or equal to 10, otherwise 'gist_rainbow'
+                colormap.
 
             Single color (fading to white) colormaps will be generated from the colors
             in the list or colors taken from the colormap, and passed to the `cmap`
@@ -506,15 +512,18 @@ class DecisionBoundaryDisplay:
                `multiclass_colors` is now also used when `response_method="predict"`
 
         xlabel : str, default=None
-            The label used for the x-axis. If `None`, an attempt is made to extract a
-            label from `X` if it is a dataframe, otherwise an empty string is used.
+            The label used for the x-axis. If `None`, an attempt is made to
+            extract a label from `X` if it is a dataframe, otherwise an empty
+            string is used.
 
         ylabel : str, default=None
-            The label used for the y-axis. If `None`, an attempt is made to extract a
-            label from `X` if it is a dataframe, otherwise an empty string is used.
+            The label used for the y-axis. If `None`, an attempt is made to
+            extract a label from `X` if it is a dataframe, otherwise an empty
+            string is used.
 
         ax : Matplotlib axes, default=None
-            Axes object to plot on. If `None`, a new figure and axes is created.
+            Axes object to plot on. If `None`, a new figure and axes is
+            created.
 
         **kwargs : dict
             Additional keyword arguments to be passed to the `plot_method`.
