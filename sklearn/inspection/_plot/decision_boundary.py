@@ -304,8 +304,7 @@ class DecisionBoundaryDisplay:
             colormap or colors, otherwise the default colormap ('viridis') is used. If
             not specified by the user, `zorder` is set to -1 to ensure that the decision
             boundary is plotted in the background (in case a scatter plot is added on
-            top) and `antialiased` is set to `True` to smooth the lines for multiclass
-            `contour` and `contourf`.
+            top).
 
         Returns
         -------
@@ -345,9 +344,6 @@ class DecisionBoundaryDisplay:
             # added on top)
             if "zorder" not in kwargs:
                 kwargs["zorder"] = -1
-            # Smooth lines if not specified otherwise
-            if plot_method != "pcolormesh" and "antialiased" not in kwargs:
-                kwargs["antialiased"] = True
 
             if self.response.ndim == 3:  # predict_proba and decision_function
                 multiclass_cmaps = [
@@ -375,7 +371,6 @@ class DecisionBoundaryDisplay:
                             self.xx1,
                             self.response.argmax(axis=2),
                             colors="black",
-                            antialiased=True,
                             zorder=-1,
                             # set levels to ensure all boundaries are plotted correctly
                             levels=np.arange(self.n_classes),
