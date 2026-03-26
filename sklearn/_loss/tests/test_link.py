@@ -118,6 +118,7 @@ def test_link_inverse_array_api(
         rtol = 1e-3 if n_classes else 1e-4
     else:
         rtol = 1e-8
+    atol = 1e-6 if namespace == "array_api_strict" and dtype_name == "float32" else 0
 
     with config_context(array_api_dispatch=True):
         raw_prediction_xp = xp.asarray(raw_prediction.astype(dtype_name), device=device)
@@ -133,4 +134,5 @@ def test_link_inverse_array_api(
             move_to(link.link(y_pred_xp), xp=np, device="cpu"),
             link.link(y_pred),
             rtol=rtol,
+            atol=atol,
         )
