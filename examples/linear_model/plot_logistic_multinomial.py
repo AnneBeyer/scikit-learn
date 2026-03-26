@@ -129,7 +129,7 @@ def plot_hyperplanes(classifier, X, ax, colors):
         a = -w[0] / w[1]
         xx = np.linspace(xmin, xmax)
         yy = a * xx - (intercept[i]) / w[1]
-        ax.plot(xx, yy, "--", color=color, linewidth=3, label=f"Class {i}")
+        ax.plot(xx, yy, "--", color=color, linewidth=4, label=f"Class {i}")
 
     return ax.get_legend_handles_labels()
 
@@ -146,7 +146,7 @@ for model, title, ax in [
     (logistic_regression_ovr, "One-vs-Rest Logistic Regression Hyperplanes", ax2),
 ]:
     hyperplane_handles, hyperplane_labels = plot_hyperplanes(
-        model, X, ax, colors=["blue", "gray", "red"]
+        model, X, ax, colors=["blue", "dimgray", "red"]
     )
     scatter = ax.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolor="k")
     scatter_handles, scatter_labels = scatter.legend_elements()
