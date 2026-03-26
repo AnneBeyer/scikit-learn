@@ -25,14 +25,12 @@ the line when the probability estimate for a class is of 0.5.
 # more challenging. This results in a 2D dataset with three overlapping classes,
 # suitable for demonstrating the differences between multinomial and one-vs-rest
 # logistic regression.
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
 from sklearn.datasets import make_blobs
 
-# get the first three colors from the "tab10" colormap for easily distinguishable colors
-cmap = mpl.colors.ListedColormap((plt.get_cmap("tab10").colors[:3]))
+cmap = "coolwarm"
 
 centers = [[-5, 0], [0, 1.5], [5, -1]]
 X, y = make_blobs(n_samples=1_000, centers=centers, random_state=40)
@@ -90,7 +88,7 @@ for model, title, ax in [
         ax=ax,
         response_method="predict",
         alpha=0.8,
-        # "tab10" is the default multiclass colormap for < 10 classes
+        multiclass_colors=cmap,
     )
     scatter = ax.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolor="k")
     legend = ax.legend(*scatter.legend_elements(), title="Classes")
@@ -114,7 +112,7 @@ for model, title, ax in [
 #
 # We also visualize the hyperplanes that correspond to the line when the probability
 # estimate for a class is 0.5.
-def plot_hyperplanes(classifier, X, ax):
+def plot_hyperplanes(classifier, X, ax, colors):
     xmin, xmax = X[:, 0].min(), X[:, 0].max()
     ymin, ymax = X[:, 1].min(), X[:, 1].max()
     ax.set(xlim=(xmin, xmax), ylim=(ymin, ymax))
@@ -126,12 +124,12 @@ def plot_hyperplanes(classifier, X, ax):
         coef = classifier.coef_
         intercept = classifier.intercept_
 
-    for i in range(coef.shape[0]):
+    for i, color in zip(range(coef.shape[0]), colors):
         w = coef[i]
         a = -w[0] / w[1]
         xx = np.linspace(xmin, xmax)
         yy = a * xx - (intercept[i]) / w[1]
-        ax.plot(xx, yy, "--", linewidth=3, label=f"Class {i}")
+        ax.plot(xx, yy, "--", color=color, linewidth=3, label=f"Class {i}")
 
     return ax.get_legend_handles_labels()
 
@@ -147,7 +145,9 @@ for model, title, ax in [
     ),
     (logistic_regression_ovr, "One-vs-Rest Logistic Regression Hyperplanes", ax2),
 ]:
-    hyperplane_handles, hyperplane_labels = plot_hyperplanes(model, X, ax)
+    hyperplane_handles, hyperplane_labels = plot_hyperplanes(
+        model, X, ax, colors=["blue", "gray", "red"]
+    )
     scatter = ax.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolor="k")
     scatter_handles, scatter_labels = scatter.legend_elements()
 
