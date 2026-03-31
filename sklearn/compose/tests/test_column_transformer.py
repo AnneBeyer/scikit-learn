@@ -2887,14 +2887,6 @@ def test_unused_transformer_request_present():
     assert router.consumes("fit", ["metadata"]) == set(["metadata"])
 
 
-class TransformerNoMetadata(TransformerMixin, BaseEstimator):
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X):
-        return X
-
-
 class TransformerFitMetadata(TransformerMixin, BaseEstimator):
     def fit(self, X, y=None, sample_weight=None):
         return self
@@ -2903,23 +2895,15 @@ class TransformerFitMetadata(TransformerMixin, BaseEstimator):
         return X
 
 
-class TransformerFitTransformMetadata(TransformerMixin, BaseEstimator):
-    def fit(self, X, y=None, sample_weight=None):
-        return self
-
-    def transform(self, X, sample_weight=None):
-        return X
-
-
 @config_context(enable_metadata_routing=True)
 @pytest.mark.parametrize(
     "remainder",
     [
         "drop",
-        "passthrough",
-        TransformerNoMetadata(),
-        "transformer_fit",
-        "transformer_fit_transform",
+        "passthrough",  # consumes no metadata
+        Trans(),  # consumes no metadata
+        "transformer_fit",  # only fit consumes metadata
+        "transformer_fit_transform",  # fit and transform consume metadata
     ],
 )
 def test_metadata_routing_with_remainder_no_error(remainder):
@@ -2935,13 +2919,13 @@ def test_metadata_routing_with_remainder_no_error(remainder):
         remainder = TransformerFitMetadata().set_fit_request(sample_weight=True)
     elif remainder == "transformer_fit_transform":
         remainder = (
-            TransformerFitTransformMetadata()
+            ConsumingTransformer()
             .set_fit_request(sample_weight=True)
             .set_transform_request(sample_weight=True)
         )
 
     ct = ColumnTransformer(
-        [("scale", StandardScaler().set_fit_request(sample_weight=True), [0])],
+        [("trans", TransformerFitMetadata().set_fit_request(sample_weight=True), [0])],
         remainder=remainder,
     )
 
@@ -2951,6 +2935,10 @@ def test_metadata_routing_with_remainder_no_error(remainder):
         assert "remainder" not in router._route_mappings
     else:
         assert "remainder" in router._route_mappings
+        if remainder == "passthrough" or isinstance(remainder, Trans):
+            router_dict = router._serialize()
+            # for the remainder transformer, no data is actually registered to be routed
+            assert router_dict["remainder"]["router"] == {}
 
     # Double-check that no error is raised
     ct.fit_transform(X, y=y, sample_weight=sample_weight)
