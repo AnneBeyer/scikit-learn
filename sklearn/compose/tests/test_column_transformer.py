@@ -2887,5 +2887,74 @@ def test_unused_transformer_request_present():
     assert router.consumes("fit", ["metadata"]) == set(["metadata"])
 
 
+class TransformerNoMetadata(TransformerMixin, BaseEstimator):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return X
+
+
+class TransformerFitMetadata(TransformerMixin, BaseEstimator):
+    def fit(self, X, y=None, sample_weight=None):
+        return self
+
+    def transform(self, X):
+        return X
+
+
+class TransformerFitTransformMetadata(TransformerMixin, BaseEstimator):
+    def fit(self, X, y=None, sample_weight=None):
+        return self
+
+    def transform(self, X, sample_weight=None):
+        return X
+
+
+@config_context(enable_metadata_routing=True)
+@pytest.mark.parametrize(
+    "remainder",
+    [
+        "drop",
+        "passthrough",
+        TransformerNoMetadata(),
+        "transformer_fit",
+        "transformer_fit_transform",
+    ],
+)
+def test_metadata_routing_with_remainder_no_error(remainder):
+    # Make sure that metadata routing works with all possible remainder types.
+    # Non-regression test for https://github.com/scikit-learn/scikit-learn/issues/33614
+
+    X = np.array([[1, 2], [3, 4]])
+    y = [0, 1]
+    sample_weight = [1, 1]
+
+    # This can only be set here because metadata routing has to be enabled first.
+    if remainder == "transformer_fit":
+        remainder = TransformerFitMetadata().set_fit_request(sample_weight=True)
+    elif remainder == "transformer_fit_transform":
+        remainder = (
+            TransformerFitTransformMetadata()
+            .set_fit_request(sample_weight=True)
+            .set_transform_request(sample_weight=True)
+        )
+
+    ct = ColumnTransformer(
+        [("scale", StandardScaler().set_fit_request(sample_weight=True), [0])],
+        remainder=remainder,
+    )
+
+    # Check that remainder is registered correctly
+    router = ct.get_metadata_routing()
+    if remainder == "drop":
+        assert "remainder" not in router._route_mappings
+    else:
+        assert "remainder" in router._route_mappings
+
+    # Double-check that no error is raised
+    ct.fit_transform(X, y=y, sample_weight=sample_weight)
+
+
 # End of Metadata Routing Tests
 # =============================
