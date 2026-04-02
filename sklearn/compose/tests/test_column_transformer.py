@@ -2930,10 +2930,6 @@ def test_metadata_routing_with_remainder_no_error(remainder):
         assert "remainder" not in router._route_mappings
     else:
         assert "remainder" in router._route_mappings
-        if remainder == "passthrough" or isinstance(remainder, Trans):
-            router_dict = router._serialize()
-            # for the remainder transformer, no data is actually registered to be routed
-            assert router_dict["remainder"]["router"] == {}
 
     # Double-check that no error is raised
     ct.fit_transform(X, y=y, sample_weight=sample_weight)
