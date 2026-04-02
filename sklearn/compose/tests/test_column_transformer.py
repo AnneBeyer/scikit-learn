@@ -2887,14 +2887,6 @@ def test_unused_transformer_request_present():
     assert router.consumes("fit", ["metadata"]) == set(["metadata"])
 
 
-class TransformerFitMetadata(TransformerMixin, BaseEstimator):
-    def fit(self, X, y=None, sample_weight=None):
-        return self
-
-    def transform(self, X):
-        return X
-
-
 @config_context(enable_metadata_routing=True)
 @pytest.mark.parametrize(
     "remainder",
@@ -2902,8 +2894,7 @@ class TransformerFitMetadata(TransformerMixin, BaseEstimator):
         "drop",
         "passthrough",  # consumes no metadata
         Trans(),  # consumes no metadata
-        "transformer_fit",  # only fit consumes metadata
-        "transformer_fit_transform",  # fit and transform consume metadata
+        ConsumingTransformer(),  # consumes metadata
     ],
 )
 def test_metadata_routing_with_remainder_no_error(remainder):
@@ -2915,17 +2906,21 @@ def test_metadata_routing_with_remainder_no_error(remainder):
     sample_weight = [1, 1]
 
     # This can only be set here because metadata routing has to be enabled first.
-    if remainder == "transformer_fit":
-        remainder = TransformerFitMetadata().set_fit_request(sample_weight=True)
-    elif remainder == "transformer_fit_transform":
-        remainder = (
-            ConsumingTransformer()
-            .set_fit_request(sample_weight=True)
-            .set_transform_request(sample_weight=True)
+    if isinstance(remainder, ConsumingTransformer):
+        remainder.set_fit_request(sample_weight=True).set_transform_request(
+            sample_weight=True
         )
 
     ct = ColumnTransformer(
-        [("trans", TransformerFitMetadata().set_fit_request(sample_weight=True), [0])],
+        [
+            (
+                "trans",
+                ConsumingTransformer()
+                .set_fit_request(sample_weight=True)
+                .set_transform_request(sample_weight=True),
+                [0],
+            )
+        ],
         remainder=remainder,
     )
 
