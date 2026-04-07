@@ -63,7 +63,7 @@ def _select_colors(mpl, multiclass_colors, n_classes):
     mpl : module
         Imported `matplotlib` module.
 
-    multiclass_colors : str, or list of color-like, default=None
+    multiclass_colors : str, or list of Matplotlib colors, default=None
         The colormap or colors to select.
 
         Possible inputs are:
@@ -72,7 +72,7 @@ def _select_colors(mpl, multiclass_colors, n_classes):
           <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
           if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
         * str: name of :class:`matplotlib.colors.Colormap`
-        * list: list of length `n_classes` of Matplotlib `colors
+        * list: list of length `n_classes` of `Matplotlib colors
           <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
 
     n_classes : int
@@ -173,7 +173,7 @@ class DecisionBoundaryDisplay:
             (grid_resolution, grid_resolution, n_classes)
         Values of the response function.
 
-    multiclass_colors : str, or list of color-like, default=None
+    multiclass_colors : str, or list of Matplotlib colors, default=None
         Specifies how to color each class when plotting all classes of
         :term:`multiclass` problems.
 
@@ -183,7 +183,7 @@ class DecisionBoundaryDisplay:
           <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
           if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
         * str: name of :class:`matplotlib.colors.Colormap`
-        * list: list of length `n_classes` of Matplotlib `colors
+        * list: list of length `n_classes` of `Matplotlib colors
           <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
 
         Single color (fading to white) colormaps will be generated from the colors in
@@ -195,7 +195,9 @@ class DecisionBoundaryDisplay:
 
         .. versionadded:: 1.7
         .. versionchanged:: 1.9
-           `multiclass_colors` is now also used when `response_method="predict"`
+           `multiclass_colors` is now also used when `response_method="predict"`, and
+           the default colors changed from 'tab10' to the more accessible `Petroff
+           colors <Petroff colors_>`_.
 
     xlabel : str, default=None
         Default label to place on x axis.
@@ -460,18 +462,17 @@ class DecisionBoundaryDisplay:
 
             .. versionadded:: 1.4
 
-        multiclass_colors : str, or list of color-like, default=None
+        multiclass_colors : str, or list of Matplotlib colors, default=None
             Specifies how to color each class when plotting :term:`multiclass` problems
             and `class_of_interest` is None.
 
             Possible inputs are:
 
-            * None: defaults to list of accessible `Petroff colors
-              <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
+            * None: defaults to list of accessible `Petroff colors <Petroff colors_>`_
               if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
             * str: name of :class:`matplotlib.colors.Colormap`
-            * list: list of length `n_classes` of Matplotlib `colors
-              <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
+            * list: list of length `n_classes` of `Matplotlib colors <Matplotlib
+              colors_>`_
 
             Single color (fading to white) colormaps will be generated from the colors
             in the list or colors taken from the colormap, and passed to the `cmap`
@@ -483,7 +484,9 @@ class DecisionBoundaryDisplay:
 
             .. versionadded:: 1.7
             .. versionchanged:: 1.9
-               `multiclass_colors` is now also used when `response_method="predict"`
+               `multiclass_colors` is now also used when `response_method="predict"`,
+               and the default colors changed from 'tab10' to the more accessible
+               `Petroff colors <Petroff colors_>`_.
 
         xlabel : str, default=None
             The label used for the x-axis. If `None`, an attempt is made to
