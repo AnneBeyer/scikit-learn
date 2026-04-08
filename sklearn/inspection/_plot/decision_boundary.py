@@ -63,7 +63,7 @@ def _select_colors(mpl, multiclass_colors, n_classes):
     mpl : module
         Imported `matplotlib` module.
 
-    multiclass_colors : str, or list of Matplotlib colors, default=None
+    multiclass_colors : str, or list of matplotlib colors, default=None
         The colormap or colors to select.
 
         Possible inputs are:
@@ -72,7 +72,7 @@ def _select_colors(mpl, multiclass_colors, n_classes):
           <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
           if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
         * str: name of :class:`matplotlib.colors.Colormap`
-        * list: list of length `n_classes` of `Matplotlib colors
+        * list: list of length `n_classes` of `matplotlib colors
           <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
 
     n_classes : int
@@ -173,7 +173,7 @@ class DecisionBoundaryDisplay:
             (grid_resolution, grid_resolution, n_classes)
         Values of the response function.
 
-    multiclass_colors : str, or list of Matplotlib colors, default=None
+    multiclass_colors : str, or list of matplotlib colors, default=None
         Specifies how to color each class when plotting all classes of
         :term:`multiclass` problems.
 
@@ -183,7 +183,7 @@ class DecisionBoundaryDisplay:
           <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
           if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
         * str: name of :class:`matplotlib.colors.Colormap`
-        * list: list of length `n_classes` of `Matplotlib colors
+        * list: list of length `n_classes` of `matplotlib colors
           <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
 
         Single color (fading to white) colormaps will be generated from the colors in
@@ -462,17 +462,18 @@ class DecisionBoundaryDisplay:
 
             .. versionadded:: 1.4
 
-        multiclass_colors : str, or list of Matplotlib colors, default=None
+        multiclass_colors : str, or list of matplotlib colors, default=None
             Specifies how to color each class when plotting :term:`multiclass` problems
             and `class_of_interest` is None.
 
             Possible inputs are:
 
-            * None: defaults to list of accessible `Petroff colors <Petroff colors_>`_
+            * None: defaults to list of accessible `Petroff colors
+              <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
               if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
             * str: name of :class:`matplotlib.colors.Colormap`
-            * list: list of length `n_classes` of `Matplotlib colors <Matplotlib
-              colors_>`_
+            * list: list of length `n_classes` of `matplotlib colors
+              <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
 
             Single color (fading to white) colormaps will be generated from the colors
             in the list or colors taken from the colormap, and passed to the `cmap`
