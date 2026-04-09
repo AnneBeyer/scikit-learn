@@ -789,7 +789,7 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
     # Check that all expected colors are visible for contourf:
     if plot_method == "contourf":
         expected_colors = pyplot.get_cmap("gist_rainbow")(np.linspace(0, 1, 6))
-        assert_array_equal(expected_colors, disp.surface_._facecolors)
+        assert_array_equal(expected_colors, disp.surface_.get_facecolor())
 
 
 def test_multiclass_levels_warning(pyplot):
