@@ -753,9 +753,11 @@ def test_multiclass_not_enough_colors_error(pyplot):
     ],
 )
 def test_multiclass_levels(pyplot, y, response_method, plot_method):
-    """Non-regression test for issue #32866.
+    """Check that `levels` are set correctly to ensure that all classes or class
+    boundaries are plotted correctly. (only relevant for "contour" and "predict" with
+    "contourf".)
 
-    Levels are only relevant for "contour" and "predict" with "contourf".
+    Non-regression test for issue #32866.
     """
     X = np.array([[-1, -1], [-2, -1], [1, 1], [2, 1], [2, 2], [3, 2]])
 
@@ -766,6 +768,7 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
         X,
         response_method=response_method,
         plot_method=plot_method,
+        multiclass_colors="gist_rainbow",
     )
 
     if plot_method == "contour":
@@ -782,6 +785,11 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
         levels = disp.surface_.levels
 
     assert_allclose(levels, expected_levels)
+
+    # Check that all expected colors are visible for contourf:
+    if plot_method == "contourf":
+        expected_colors = pyplot.get_cmap("gist_rainbow")(np.linspace(0, 1, 6))
+        assert_array_equal(expected_colors, disp.surface_._facecolors)
 
 
 def test_multiclass_levels_warning(pyplot):
