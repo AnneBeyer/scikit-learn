@@ -183,7 +183,8 @@ class DecisionBoundaryDisplay:
 
         When `response_method='predict'` and `plot_method='contour'`,
         `multiclass_colors` is ignored and the class boundaries are plotted in black
-        instead.
+        instead as the boundary lines may overlap and the colors don't necessarily
+        correspond to the classes.
 
         For :term:`binary` problems, `multiclass_colors` is also ignored and `cmap` or
         `colors` can be passed as kwargs instead, otherwise, the default colormap
@@ -491,9 +492,14 @@ class DecisionBoundaryDisplay:
             in the list or colors taken from the colormap, and passed to the `cmap`
             parameter of the `plot_method`.
 
-            For :term:`binary` problems, this is ignored and `cmap` or `colors` can be
-            passed as kwargs instead, otherwise, the default colormap ('viridis') is
-            used.
+            When `response_method='predict'` and `plot_method='contour'`,
+            `multiclass_colors` is ignored and the class boundaries are plotted in black
+            instead as the boundary lines may overlap and the colors don't necessarily
+            correspond to the classes.
+
+            For :term:`binary` problems, `multiclass_colors` is also ignored and `cmap`
+            or `colors` can be passed as kwargs instead, otherwise, the default colormap
+            ('viridis') is used.
 
             .. versionadded:: 1.7
             .. versionchanged:: 1.9
