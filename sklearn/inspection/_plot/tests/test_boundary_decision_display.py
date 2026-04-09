@@ -792,6 +792,26 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
         assert_array_equal(expected_colors, disp.surface_.get_facecolor())
 
 
+@pytest.mark.parametrize(
+    "response_method", ["decision_function", "predict_proba", "predict"]
+)
+@pytest.mark.parametrize("plot_method", ["contourf", "contour", "pcolormesh"])
+def test_zorder(pyplot, response_method, plot_method):
+    """Check that decision boundaries are plottet in the background."""
+    X = np.array([[-1, -1], [-2, -1], [1, 1], [2, 1], [2, 2], [3, 2]])
+    y = np.arange(6)
+    clf = LogisticRegression().fit(X, y)
+    disp = DecisionBoundaryDisplay.from_estimator(
+        clf, X, response_method=response_method, plot_method=plot_method
+    )
+
+    if isinstance(disp.surface_, list):
+        for surface in disp.surface_:
+            assert surface.get_zorder() == -1
+    else:
+        assert disp.surface_.get_zorder() == -1
+
+
 # estimator classes for non-regression test cases for issue #33194
 class CustomBinaryEstimator(BaseEstimator):
     def fit(self, X, y):
