@@ -792,22 +792,6 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
         assert_array_equal(expected_colors, disp.surface_.get_facecolor())
 
 
-def test_multiclass_levels_warning(pyplot):
-    """Non-regression test for PR ##33471."""
-    X = np.array([[-1, -1], [-2, -1], [1, 1], [2, 1], [2, 2], [3, 2]])
-    y = np.arange(6)
-    clf = LogisticRegression().fit(X, y)
-    msg = "Setting `levels` manually is not recommended."
-    with pytest.warns(UserWarning, match=msg):
-        DecisionBoundaryDisplay.from_estimator(
-            clf,
-            X,
-            response_method="predict",
-            plot_method="contour",
-            levels=100,
-        )
-
-
 # estimator classes for non-regression test cases for issue #33194
 class CustomBinaryEstimator(BaseEstimator):
     def fit(self, X, y):

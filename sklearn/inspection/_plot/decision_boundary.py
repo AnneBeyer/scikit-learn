@@ -384,13 +384,6 @@ class DecisionBoundaryDisplay:
                         kwargs["levels"] = np.arange(self.n_classes)
                     elif plot_method == "contourf":
                         kwargs["levels"] = np.arange(self.n_classes + 1) - 0.5
-                else:
-                    warnings.warn(
-                        "Setting `levels` manually is not recommended. "
-                        "The Display class will take care of setting them such that "
-                        "all boundaries are displayed correctly.",
-                        UserWarning,
-                    )
 
                 if plot_method == "contour":
                     self.surface_ = plot_func(
