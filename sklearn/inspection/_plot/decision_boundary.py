@@ -176,7 +176,7 @@ class DecisionBoundaryDisplay:
         Possible inputs are:
 
         * None: defaults to list of accessible `Petroff colors
-          <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
+          <https://arxiv.org/abs/2107.02270>`_
           if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
         * str: name of :class:`matplotlib.colors.Colormap`
         * list: list of length `n_classes` of `matplotlib colors
@@ -193,7 +193,7 @@ class DecisionBoundaryDisplay:
         .. versionchanged:: 1.9
            `multiclass_colors` is now also used when `response_method="predict"`, and
            the default colors changed from 'tab10' to the more accessible `Petroff
-           colors <Petroff colors_>`_.
+           colors <https://arxiv.org/abs/2107.02270>`_.
 
     xlabel : str, default=None
         Default label to place on x axis.
@@ -465,7 +465,7 @@ class DecisionBoundaryDisplay:
             Possible inputs are:
 
             * None: defaults to list of accessible `Petroff colors
-              <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
+              <https://arxiv.org/abs/2107.02270>`_
               if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
             * str: name of :class:`matplotlib.colors.Colormap`
             * list: list of length `n_classes` of `matplotlib colors
@@ -483,7 +483,7 @@ class DecisionBoundaryDisplay:
             .. versionchanged:: 1.9
                `multiclass_colors` is now also used when `response_method="predict"`,
                and the default colors changed from 'tab10' to the more accessible
-               `Petroff colors <Petroff colors_>`_.
+               `Petroff colors <https://arxiv.org/abs/2107.02270>`_.
 
         xlabel : str, default=None
             The label used for the x-axis. If `None`, an attempt is made to
