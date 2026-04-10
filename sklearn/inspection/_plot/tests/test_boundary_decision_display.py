@@ -789,7 +789,16 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
     # Check that all expected colors are visible for contourf:
     if plot_method == "contourf":
         expected_colors = pyplot.get_cmap("gist_rainbow")(np.linspace(0, 1, 6))
-        surface_colors = disp.ax_.collections[0].get_facecolor()
+        import matplotlib as mpl
+
+        # In matplotlib 3.10.0, the API was changed to produce only one collection per
+        # plot, whereas before, a collection was created for each level separately.
+        if parse_version(mpl.__version__) >= parse_version("3.10.0"):
+            surface_colors = disp.ax_.collections[0].get_facecolor()
+        else:
+            surface_colors = [
+                collection.get_facecolor() for collection in disp.ax_.collections
+            ]
         assert_allclose(expected_colors, surface_colors)
 
 
