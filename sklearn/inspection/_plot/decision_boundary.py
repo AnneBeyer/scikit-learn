@@ -12,7 +12,7 @@ from sklearn.utils._dataframe import is_pandas_df, is_polars_df
 from sklearn.utils._optional_dependencies import check_matplotlib_support
 from sklearn.utils._response import _get_response_values
 from sklearn.utils._set_output import _get_adapter_from_container
-from sklearn.utils.fixes import QUALITATIVE_COLORS
+from sklearn.utils.fixes import PETROFF_COLORS
 from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import (
     _is_arraylike_not_scalar,
@@ -89,12 +89,8 @@ def _select_colors(mpl, multiclass_colors, n_classes):
         # select accessible colors according to Matthew A. Petroff, see
         # https://arxiv.org/abs/2107.02270 and
         # https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352
-        if n_classes <= 6:
-            multiclass_colors = QUALITATIVE_COLORS["petroff6"][:n_classes]
-        elif n_classes <= 8:
-            multiclass_colors = QUALITATIVE_COLORS["petroff8"][:n_classes]
-        elif n_classes <= 10:
-            multiclass_colors = QUALITATIVE_COLORS["petroff10"][:n_classes]
+        if n_classes <= 10:
+            multiclass_colors = PETROFF_COLORS[:n_classes]
         else:
             multiclass_colors = "gist_rainbow"
 

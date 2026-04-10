@@ -27,7 +27,7 @@ from sklearn.utils._testing import (
     assert_allclose,
     assert_array_equal,
 )
-from sklearn.utils.fixes import parse_version
+from sklearn.utils.fixes import PETROFF_COLORS, parse_version
 
 X, y = make_classification(
     n_informative=1,
@@ -629,8 +629,6 @@ def test_multiclass_plot_max_class(pyplot, response_method):
     "multiclass_colors, n_classes",
     [
         (None, 3),
-        (None, 7),
-        (None, 9),
         (None, 11),
         ("plasma", 3),
         ("Blues", 3),
@@ -675,29 +673,7 @@ def test_multiclass_colors_cmap(
         # make sure the correct colors are selected from the corresponding petroff color
         # sequences or "gist_rainbow"
         if len(clf.classes_) == 3:
-            multiclass_colors = ["#5790fc", "#f89c20", "#e42536"]
-        elif len(clf.classes_) == 7:
-            multiclass_colors = [
-                "#1845fb",
-                "#ff5e02",
-                "#c91f16",
-                "#c849a9",
-                "#adad7d",
-                "#86c8dd",
-                "#578dff",
-            ]
-        elif len(clf.classes_) == 9:
-            multiclass_colors = [
-                "#3f90da",
-                "#ffa90e",
-                "#bd1f01",
-                "#94a4a2",
-                "#832db6",
-                "#a96b59",
-                "#e76300",
-                "#b9ac70",
-                "#717581",
-            ]
+            multiclass_colors = PETROFF_COLORS[:3]
         else:
             multiclass_colors = "gist_rainbow"
 

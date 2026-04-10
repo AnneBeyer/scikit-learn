@@ -543,30 +543,17 @@ def _safely_cast_index_arrays(A, idx_dtype=np.int32, msg=""):
     # DOK and LIL formats are not associated with index arrays.
 
 
-# TODO remove when matplotlib 3.11 is the minimal supported version
-# and replace usage with `mpl.color_sequences['petroffX']`
-QUALITATIVE_COLORS = {
-    "petroff6": ["#5790fc", "#f89c20", "#e42536", "#964a8b", "#9c9ca1", "#7a21dd"],
-    "petroff8": [
-        "#1845fb",
-        "#ff5e02",
-        "#c91f16",
-        "#c849a9",
-        "#adad7d",
-        "#86c8dd",
-        "#578dff",
-        "#656364",
-    ],
-    "petroff10": [
-        "#3f90da",
-        "#ffa90e",
-        "#bd1f01",
-        "#94a4a2",
-        "#832db6",
-        "#a96b59",
-        "#e76300",
-        "#b9ac70",
-        "#717581",
-        "#92dadd",
-    ],
-}
+# TODO remove when matplotlib 3.10 is the minimal supported version
+# and replace usage with `mpl.color_sequences['petroff10']`
+PETROFF_COLORS = [
+    "#3f90da",
+    "#ffa90e",
+    "#bd1f01",
+    "#94a4a2",
+    "#832db6",
+    "#a96b59",
+    "#e76300",
+    "#b9ac70",
+    "#717581",
+    "#92dadd",
+]
