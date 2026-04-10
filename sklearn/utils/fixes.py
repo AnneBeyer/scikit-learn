@@ -1,4 +1,4 @@
-"""Compatibility fixes for older version of python, numpy and scipy and others
+"""Compatibility fixes for older version of the dependencies
 
 If you add content to this file, please give the version of the package
 at which the fix is no longer needed.
