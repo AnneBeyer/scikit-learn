@@ -796,9 +796,9 @@ def test_multiclass_levels(pyplot, y, response_method, plot_method):
         if parse_version(mpl.__version__) >= parse_version("3.10.0"):
             surface_colors = disp.ax_.collections[0].get_facecolor()
         else:
-            surface_colors = [
-                collection.get_facecolor() for collection in disp.ax_.collections
-            ]
+            surface_colors = np.array(
+                [collection.get_facecolor()[0] for collection in disp.ax_.collections]
+            )
         assert_allclose(expected_colors, surface_colors)
 
 
