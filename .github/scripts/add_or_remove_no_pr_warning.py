@@ -37,8 +37,10 @@ if args.mode == "add":
         print(f"Added warning to issue: {os.environ['GITHUB_REPO']}#{issue.number}")
 
 else:
-    has_needs_labels = any(label.name.startswith("Needs") for label in issue.labels)
-    if not has_needs_labels:
+    still_needs_something = any(
+        label.name.startswith("Needs") or label.name == "RFC" for label in issue.labels
+    )
+    if not still_needs_something:
         if body_text.startswith(message):
             new_body = body_text.removeprefix(f"{message}\n\n")
             issue.edit(body=new_body)
