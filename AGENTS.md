@@ -1,8 +1,3 @@
-agent_rules:
-include_ai_disclosure: true
-forbid_untriaged_issues: true
-forbid_issues_with_linked_prs: true
-
 # AGENTS Instruction
 
 This file contains mandatory guidance for all AI agents working on scikit-learn.
