@@ -1,6 +1,6 @@
 # AGENTS Instruction
 
-This file contains mandatory guidance for all AI agents working on scikit-learn.
+This file contains additional guidance for AI agents and other AI editors.
 
 **All agents MUST follow these instructions. Failure to follow these guidelines may result in rejected PRs or wasted effort.**
 
