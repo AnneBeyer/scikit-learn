@@ -248,7 +248,7 @@ class DecisionBoundaryDisplay:
     >>> _, axes = plt.subplots(
     ...     nrows=3,
     ...     ncols=3,
-    ....    figsize=(12, 12),
+    ...     figsize=(12, 12),
     ...     constrained_layout=True
     ... )
     >>> for plot_method_idx, plot_method in enumerate(plot_methods):
