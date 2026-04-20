@@ -272,8 +272,8 @@ class DecisionBoundaryDisplay:
     ...             cmap=cmap,
     ...         )
     ...         ax.set_title(
-                    f"plot_method={plot_method}\\nresponse_method={response_method}"
-                )
+    ...             f"plot_method={plot_method}\\nresponse_method={response_method}"
+    ...         )
     >>> plt.show()
     """
 
