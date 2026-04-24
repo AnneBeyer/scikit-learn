@@ -80,7 +80,7 @@ for ax, weights in zip(axs, ("uniform", "distance")):
     disp.ax_.legend(
         scatter.legend_elements()[0],
         iris.target_names,
-        loc="lower left",
+        loc="lower right",
         title="Classes",
     )
     _ = disp.ax_.set_title(
