@@ -45,12 +45,12 @@ jobs:
           ./build_tools/linting.sh &> /tmp/linting_output.txt
           cat /tmp/linting_output.txt
 
-      - name: Upload Artifact
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: lint-log
-          path: |
-            /tmp/linting_output.txt
-            /tmp/versions.txt
-          retention-days: 1
+      # - name: Upload Artifact
+      #   if: always()
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     name: lint-log
+      #     path: |
+      #       /tmp/linting_output.txt
+      #       /tmp/versions.txt
+      #     retention-days: 1
