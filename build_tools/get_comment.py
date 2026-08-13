@@ -91,7 +91,7 @@ def get_message(log_file, repo_str, pr_number, sha, run_id, details, versions):
             "There was an issue running the linter job. Please update with "
             "`upstream/main` ([link]("
             "https://scikit-learn.org/dev/developers/contributing.html"
-            "#how-to-contribute)) and push the changes. If you already have done "
+            "#development-workflow)) and push the changes. If you already have done "
             "that, please send an empty commit with `git commit --allow-empty` "
             "and push the changes to trigger the CI.\n\n" + sub_text
         )
