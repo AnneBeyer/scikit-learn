@@ -70,8 +70,11 @@ def get_step_message(log, start, end, title, message, details):
 
 
 def get_message(log_file, repo_str, pr_number, sha, run_id, details, versions):
-    with open(log_file, "r") as f:
-        log = f.read()
+    try:
+        with open(log_file, "r") as f:
+            log = f.read()
+    except FileNotFoundError:
+        log = ""
 
     sub_text = (
         "\n\n<sub> _Generated for commit:"
