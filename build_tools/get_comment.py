@@ -70,18 +70,20 @@ def get_step_message(log, start, end, title, message, details):
 
 
 def get_message(log_file, repo_str, pr_number, sha, run_id, details, versions):
-    try:
-        with open(log_file, "r") as f:
-            log = f.read()
-    except FileNotFoundError:
-        log = ""
-
     sub_text = (
         "\n\n<sub> _Generated for commit:"
         f" [{sha[:7]}](https://github.com/{repo_str}/pull/{pr_number}/commits/{sha}). "
         "Link to the linter CI: [here]"
         f"(https://github.com/{repo_str}/actions/runs/{run_id})_ </sub>"
     )
+
+    # If the log file wasn't created due to some earlier failure in the linting step, we
+    # still want to return the generic message below.
+    try:
+        with open(log_file, "r") as f:
+            log = f.read()
+    except FileNotFoundError:
+        log = ""
 
     if "### Linting completed ###" not in log:
         return (
