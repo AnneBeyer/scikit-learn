@@ -20,8 +20,11 @@ def get_versions(versions_file):
     versions : dict
         A dictionary with the versions of the packages.
     """
-    with open(versions_file, "r") as f:
-        return dict(line.strip().split("=") for line in f)
+    try:
+        with open(versions_file, "r") as f:
+            return dict(line.strip().split("=") for line in f)
+    except FileNotFoundError:
+        return {}
 
 
 def get_step_message(log, start, end, title, message, details):
