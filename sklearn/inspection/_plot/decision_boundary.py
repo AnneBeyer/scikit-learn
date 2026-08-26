@@ -76,7 +76,7 @@ def _deprecate_multiclass_colors(multiclass_colors, target_colors):
 
 
 def _select_colors(mpl, target_colors, n_classes):
-    """Select colors for multiclass decision boundary display.
+    """Select colors for classes.
 
     Parameters
     ----------
@@ -104,7 +104,6 @@ def _select_colors(mpl, target_colors, n_classes):
         RGBA colors, one per class.
 
     """
-
     if target_colors is None:
         # select accessible colors according to Matthew A. Petroff, see
         # https://arxiv.org/abs/2107.02270 and
@@ -269,12 +268,13 @@ class DecisionBoundaryDisplay:
         `plot_method` is 'pcolormesh', `surface_` is
         :class:`QuadMesh <matplotlib.collections.QuadMesh>`.
 
-    target_colors_ : array of shape (n_classes, 4)
-        Colors used to plot each class in multiclass problems.
-        Only defined when `n_classes` > 2.
+    target_colors_ : array of shape (n_classes, 4) or None.
+        Colors used to plot each class in classification problems.
+        None for regression problems.
 
         .. versionadded:: 1.10
-            `multiclass_colors_` was renamed to `target_colors_`
+            `multiclass_colors_` was renamed to `target_colors_` and is now also used
+            for binary classification.
 
     ax_ : matplotlib Axes
         Axes with decision boundary.
@@ -394,12 +394,14 @@ class DecisionBoundaryDisplay:
             Overwrite the y-axis label.
 
         **kwargs : dict
-            Additional keyword arguments to be passed to the `plot_method`. For
-            :term:`binary` problems, `cmap` or `colors` can be set here to specify the
-            colormap or colors, otherwise the default colormap ('viridis') is used. If
+            Additional keyword arguments to be passed to the `plot_method`. If
             not specified by the user, `zorder` is set to -1 to ensure that the decision
             boundary is plotted in the background (in case a scatter plot is added on
             top).
+
+            .. versionchanged:: 1.10
+                kwargs `cmap` and `colors` are deprecated in favor of `target_colors` in
+                version 1.10 and will be removed in 1.12.
 
         Returns
         -------
@@ -459,26 +461,35 @@ class DecisionBoundaryDisplay:
             _, ax = plt.subplots()
 
         plot_func = getattr(ax, plot_method)
-        if self.n_classes == 2:
-            self.surface_ = plot_func(self.xx0, self.xx1, self.response, **kwargs)
-        else:  # multiclass
-            for kwarg in ("cmap", "colors"):
-                if kwarg in kwargs:
-                    warnings.warn(
-                        f"'{kwarg}' is ignored in favor of 'target_colors' "
-                        "in the multiclass case."
-                    )
-                    del kwargs[kwarg]
 
+        for kwarg in ("cmap", "colors"):
+            if kwarg in kwargs:
+                # TODO: properly deprecate
+                warnings.warn(f"'{kwarg}' is deprecated in favor of 'target_colors'.")
+                del kwargs[kwarg]
+
+        # If not set by the user, set default values for `zorder` to ensure that the
+        # decision boundary is plotted in the background (in case a scatter plot is
+        # added on top)
+        if "zorder" not in kwargs:
+            kwargs["zorder"] = -1
+
+        if self.n_classes is None:  # regression
+            if self.target_colors is None:
+                self.target_colors = "viridis"
+            elif self.target_colors:  # is list or qualitative colormap
+                # warn or select default?
+                self.target_colors = ...
+            # No specific class colors need to be selected from the colormap.
+            self.target_colors_ = None
+            self.surface_ = plot_func(
+                self.xx0, self.xx1, self.response, cmap=self.target_colors, **kwargs
+            )
+
+        else:  # classification
             self.target_colors_ = _select_colors(
                 mpl, self.target_colors, self.n_classes
             )
-
-            # If not set by the user, set default values for `zorder` to ensure that the
-            # decision boundary is plotted in the background (in case a scatter plot is
-            # added on top)
-            if "zorder" not in kwargs:
-                kwargs["zorder"] = -1
 
             if self.response.ndim == 3:  # predict_proba and decision_function
                 multiclass_cmaps = [
@@ -610,33 +621,29 @@ class DecisionBoundaryDisplay:
             .. versionadded:: 1.4
 
         target_colors : str or list of matplotlib colors, default=None
-            Specifies how to color each class when plotting :term:`multiclass` problems
-            and `class_of_interest` is None.
+            Specifies colors for the target values in the display.
 
             Possible inputs are:
 
-            * None: defaults to list of accessible `Petroff colors
-              <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
-              if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
+            * None: defaults to 'viridis' for regression, list of accessible `Petroff
+              colors <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
+              for classification if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
             * str: name of :class:`matplotlib.colors.Colormap`
             * list: list of length `n_classes` of `matplotlib colors
               <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
 
-            Single color (fading to white) colormaps will be generated from the colors
-            in the list or colors taken from the colormap, and passed to the `cmap`
-            parameter of the `plot_method`.
+            For classification, single color (fading to white) colormaps will be
+            generated from the colors in the list or colors taken from the colormap, and
+            passed to the `cmap` parameter of the `plot_method`.
 
             When `response_method='predict'` and `plot_method='contour'`,
             `target_colors` is ignored and the class boundaries are plotted in black
             instead as the boundary lines may overlap and the colors don't necessarily
             correspond to the classes.
 
-            For :term:`binary` problems, `target_colors` is also ignored and `cmap`
-            or `colors` can be passed as kwargs instead, otherwise, the default colormap
-            ('viridis') is used.
-
             .. versionadded:: 1.10
-                `multiclass_colors` was renamed to `target_colors`
+                `multiclass_colors` was renamed to `target_colors` and is now also used
+                for regression and binary classification.
 
         xlabel : str, default=None
             The label used for the x-axis. If `None`, an attempt is made to
@@ -691,6 +698,10 @@ class DecisionBoundaryDisplay:
 
         **kwargs : dict
             Additional keyword arguments to be passed to the `plot_method`.
+
+            .. versionchanged:: 1.10
+                kwargs `cmap` and `colors` are deprecated in favor of `target_colors` in
+                version 1.10 and will be removed in 1.12.
 
         Returns
         -------
@@ -795,11 +806,9 @@ class DecisionBoundaryDisplay:
             response = encoder.transform(response)
 
         # infer n_classes from the estimator
-        if (
-            class_of_interest is not None
-            or is_regressor(estimator)
-            or is_outlier_detector(estimator)
-        ):
+        if is_regressor(estimator):
+            n_classes = None
+        if is_outlier_detector(estimator):
             n_classes = 2
         elif is_classifier(estimator) and hasattr(estimator, "classes_"):
             n_classes = len(estimator.classes_)
@@ -807,7 +816,9 @@ class DecisionBoundaryDisplay:
             n_classes = len(np.unique(estimator.labels_))
         else:
             target_type = type_of_target(response)
-            if target_type in ("binary", "continuous"):
+            if target_type == "continuous":
+                n_classes = None
+            elif target_type == "binary":
                 n_classes = 2
             elif target_type == "multiclass":
                 n_classes = len(np.unique(response))
@@ -825,14 +836,14 @@ class DecisionBoundaryDisplay:
             if is_regressor(estimator):
                 raise ValueError("Multi-output regressors are not supported")
 
-            if class_of_interest is not None:
-                # For the multiclass case, `_get_response_values` returns the response
-                # as-is. Thus, we have a column per class and we need to select the
-                # column corresponding to the positive class.
-                col_idx = np.flatnonzero(estimator.classes_ == class_of_interest)[0]
-                response = response[:, col_idx].reshape(*xx0.shape)
-            else:
-                response = response.reshape(*xx0.shape, response.shape[-1])
+            # if class_of_interest is not None:
+            #    # For the multiclass case, `_get_response_values` returns the response
+            #    # as-is. Thus, we have a column per class and we need to select the
+            #    # column corresponding to the positive class.
+            #    col_idx = np.flatnonzero(estimator.classes_ == class_of_interest)[0]
+            #    response = response[:, col_idx].reshape(*xx0.shape)
+            # else:
+            response = response.reshape(*xx0.shape, response.shape[-1])
 
         if xlabel is None:
             xlabel = X.columns[0] if hasattr(X, "columns") else ""
