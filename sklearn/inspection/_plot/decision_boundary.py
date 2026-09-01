@@ -178,44 +178,45 @@ class DecisionBoundaryDisplay:
         For :term:`outlier detectors`, `n_classes` should be set to 2 by definition
         (inlier or outlier).
 
-        For :term:`regressors`, `n_classes` should also be set to 2 by convention
-        (continuous responses are displayed the same way as unthresholded binary
-        responses).
+        For :term:`regressors`, `n_classes` should be set to None.
 
         .. versionadded:: 1.9
+        .. versionchanged:: 1.10
+            `n_classes` should be set to `None` for regressors.
+
+    response_method: str
+        The method used to create the response values.
+
+        .. versionadded:: 1.10
 
     response : ndarray of shape (grid_resolution, grid_resolution) or \
             (grid_resolution, grid_resolution, n_classes)
         Values of the response function.
 
     target_colors : str or list of matplotlib colors, default=None
-        Specifies how to color each class when plotting all classes of
-        :term:`multiclass` problems.
+        Specifies colors for the target values in the display.
 
         Possible inputs are:
 
-        * None: defaults to list of accessible `Petroff colors
-          <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
-          if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
+        * None: defaults to 'viridis' for regression, list of accessible `Petroff
+          colors <https://github.com/matplotlib/matplotlib/issues/9460#issuecomment-875185352>`_
+          for classification if `n_classes <= 10`, otherwise 'gist_rainbow' colormap
         * str: name of :class:`matplotlib.colors.Colormap`
         * list: list of length `n_classes` of `matplotlib colors
           <https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def>`_
 
-        Single color (fading to white) colormaps will be generated from the colors in
-        the list or colors taken from the colormap, and passed to the `cmap` parameter
-        of the `plot_method`.
+        For classification, single color (fading to white) colormaps will be generated
+        from the colors in the list or colors taken from the colormap, and passed to the
+        `cmap` parameter of the `plot_method`.
 
         When `response_method='predict'` and `plot_method='contour'`,
         `target_colors` is ignored and the class boundaries are plotted in black
         instead as the boundary lines may overlap and the colors don't necessarily
         correspond to the classes.
 
-        For :term:`binary` problems, `target_colors` is also ignored and `cmap` or
-        `colors` can be passed as kwargs instead, otherwise, the default colormap
-        ('viridis') is used.
-
         .. versionadded:: 1.10
-            `multiclass_colors` was renamed to `target_colors`
+            `multiclass_colors` was renamed to `target_colors` and is now also used
+            for regression and binary classification.
 
     xlabel : str, default=None
         Default label to place on x axis.
@@ -345,6 +346,7 @@ class DecisionBoundaryDisplay:
         xx0,
         xx1,
         n_classes,
+        response_method,
         response,
         target_colors=None,
         xlabel=None,
@@ -354,6 +356,7 @@ class DecisionBoundaryDisplay:
         self.xx0 = xx0
         self.xx1 = xx1
         self.n_classes = n_classes
+        self.response_method = response_method
         self.response = response
         # TODO(1.12): remove and replace with `self.target_colors = target_colors`
         self.target_colors = _deprecate_multiclass_colors(
@@ -361,6 +364,15 @@ class DecisionBoundaryDisplay:
         )
         self.xlabel = xlabel
         self.ylabel = ylabel
+
+    # TODO(1.12): remove
+    @deprecated(
+        "Attribute `multiclass_colors` was renamed to `target_colors` in 1.10 and"
+        " will be removed in 1.12. Use `target_colors` instead."
+    )
+    @property
+    def multiclass_colors(self):
+        return self.target_colors
 
     # TODO(1.12): remove
     @deprecated(
@@ -433,6 +445,7 @@ class DecisionBoundaryDisplay:
         ...     xx0=feature_1,
         ...     xx1=feature_2,
         ...     n_classes=len(tree.classes_),
+        ...     response_method="predict",
         ...     response=y_pred
         ... )
         >>> display.plot()
@@ -477,21 +490,33 @@ class DecisionBoundaryDisplay:
         if self.n_classes is None:  # regression
             if self.target_colors is None:
                 self.target_colors = "viridis"
-            elif self.target_colors:  # is list or qualitative colormap
-                # warn or select default?
-                self.target_colors = ...
+            # TODO warn or select default if no continuous map is given?
             # No specific class colors need to be selected from the colormap.
             self.target_colors_ = None
             self.surface_ = plot_func(
                 self.xx0, self.xx1, self.response, cmap=self.target_colors, **kwargs
             )
 
-        else:  # classification
+        else:  # classification/outlier_detection
             self.target_colors_ = _select_colors(
                 mpl, self.target_colors, self.n_classes
             )
+            if self.response_method != "predict":  # predict_proba and decision_function
+                response = self.response
 
-            if self.response.ndim == 3:  # predict_proba and decision_function
+                if response.ndim == 2:
+                    # In the binary case, `_get_response_values` only returns the
+                    # response of the second class, so the response of the first one is
+                    # implicit and needs to be reconstructed to be able to use the same
+                    # code path as for multiclass. Note that the columns have to be
+                    # stacked in `classes_` order to match `target_colors_`.
+                    if self.response_method == "predict_proba":
+                        # both class probabilities sum to one
+                        response = np.stack([1 - response, response], axis=-1)
+                    else:  # decision_function
+                        # the margin of one class is the negative of the other one
+                        response = np.stack([-response, response], axis=-1)
+
                 multiclass_cmaps = [
                     mpl.colors.LinearSegmentedColormap.from_list(
                         f"colormap_{class_idx}",
@@ -501,12 +526,14 @@ class DecisionBoundaryDisplay:
                 ]
                 self.surface_ = []
                 for class_idx, cmap in enumerate(multiclass_cmaps):
-                    response = np.ma.array(
-                        self.response[:, :, class_idx],
-                        mask=(self.response.argmax(axis=2) != class_idx),
+                    masked_response = np.ma.array(
+                        response[:, :, class_idx],
+                        mask=(response.argmax(axis=2) != class_idx),
                     )
                     self.surface_.append(
-                        plot_func(self.xx0, self.xx1, response, cmap=cmap, **kwargs)
+                        plot_func(
+                            self.xx0, self.xx1, masked_response, cmap=cmap, **kwargs
+                        )
                     )
 
                 if plot_method == "contour":
@@ -515,7 +542,7 @@ class DecisionBoundaryDisplay:
                         plot_func(
                             self.xx0,
                             self.xx1,
-                            self.response.argmax(axis=2),
+                            response.argmax(axis=2),
                             colors="black",
                             zorder=-1,
                             # set levels to ensure all boundaries are plotted correctly
@@ -523,9 +550,10 @@ class DecisionBoundaryDisplay:
                         )
                     )
 
-            elif self.response.ndim == 2:  # predict
-                # Set `levels` to ensure all class boundaries are displayed.
-                if "levels" not in kwargs:
+            else:  # "predict"
+                # Set `levels` to ensure all class boundaries are displayed for
+                # multiclass cases
+                if "levels" not in kwargs and self.n_classes > 2:
                     if plot_method == "contour":
                         kwargs["levels"] = np.arange(self.n_classes)
                     elif plot_method == "contourf":
@@ -781,10 +809,17 @@ class DecisionBoundaryDisplay:
                 X_grid,
                 columns=X.columns,
             )
+        if class_of_interest is not None and not hasattr(estimator, "classes_"):
+            warnings.warn(
+                "'class_of_interest' can only be used with classifiers that define "
+                "'classes_' and will be ignored here."
+            )
+            class_of_interest = None
 
         prediction_method = _check_boundary_response_method(estimator, response_method)
-        if (class_of_interest is not None and hasattr(estimator, "classes_")) and (
-            class_of_interest not in estimator.classes_
+        if (
+            class_of_interest is not None
+            and class_of_interest not in estimator.classes_
         ):
             raise ValueError(
                 f"class_of_interest={class_of_interest} is not a valid label: It "
@@ -806,9 +841,11 @@ class DecisionBoundaryDisplay:
             response = encoder.transform(response)
 
         # infer n_classes from the estimator
-        if is_regressor(estimator):
+        if is_regressor(estimator) or class_of_interest is not None:
+            # these will use the default matplotlib plotting, passing `target_colors`
+            # directly as `cmap` to the plotting function
             n_classes = None
-        if is_outlier_detector(estimator):
+        elif is_outlier_detector(estimator):
             n_classes = 2
         elif is_classifier(estimator) and hasattr(estimator, "classes_"):
             n_classes = len(estimator.classes_)
@@ -836,14 +873,14 @@ class DecisionBoundaryDisplay:
             if is_regressor(estimator):
                 raise ValueError("Multi-output regressors are not supported")
 
-            # if class_of_interest is not None:
-            #    # For the multiclass case, `_get_response_values` returns the response
-            #    # as-is. Thus, we have a column per class and we need to select the
-            #    # column corresponding to the positive class.
-            #    col_idx = np.flatnonzero(estimator.classes_ == class_of_interest)[0]
-            #    response = response[:, col_idx].reshape(*xx0.shape)
-            # else:
-            response = response.reshape(*xx0.shape, response.shape[-1])
+            if class_of_interest is not None:
+                # For the multiclass case, `_get_response_values` returns the response
+                # as-is. Thus, we have a column per class and we need to select the
+                # column corresponding to the positive class.
+                col_idx = np.flatnonzero(estimator.classes_ == class_of_interest)[0]
+                response = response[:, col_idx].reshape(*xx0.shape)
+            else:
+                response = response.reshape(*xx0.shape, response.shape[-1])
 
         if xlabel is None:
             xlabel = X.columns[0] if hasattr(X, "columns") else ""
@@ -857,6 +894,7 @@ class DecisionBoundaryDisplay:
             xx0=xx0,
             xx1=xx1,
             n_classes=n_classes,
+            response_method=response_method_used,
             response=response,
             target_colors=target_colors,
             xlabel=xlabel,
