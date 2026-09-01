@@ -551,9 +551,8 @@ class DecisionBoundaryDisplay:
                     )
 
             else:  # "predict"
-                # Set `levels` to ensure all class boundaries are displayed for
-                # multiclass cases
-                if "levels" not in kwargs and self.n_classes > 2:
+                # Set `levels` to ensure all class boundaries are displayed
+                if "levels" not in kwargs:
                     if plot_method == "contour":
                         kwargs["levels"] = np.arange(self.n_classes)
                     elif plot_method == "contourf":
@@ -838,6 +837,13 @@ class DecisionBoundaryDisplay:
         if response_method_used == "predict" and hasattr(estimator, "classes_"):
             encoder = LabelEncoder()
             encoder.classes_ = estimator.classes_
+            response = encoder.transform(response)
+        elif response_method_used == "predict" and is_outlier_detector(estimator):
+            # Outlier detectors predict -1 (outlier) and 1 (inlier). Encode them like
+            # class labels so that the response always indexes into `target_colors_`
+            # and `levels` can be set the same way as for classifiers.
+            encoder = LabelEncoder()
+            encoder.classes_ = np.array([-1, 1])
             response = encoder.transform(response)
 
         # infer n_classes from the estimator
