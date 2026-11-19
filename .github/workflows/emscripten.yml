@@ -15,6 +15,13 @@ on:
       - "[0-9]+.[0-9]+.X"
   # Manual run
   workflow_dispatch:
+    # TEMPORARY, for testing on a fork: do not merge
+    inputs:
+      simulate:
+        description: "Skip the real build and force its result"
+        type: choice
+        options: [real, pass, fail]
+        default: real
 
 env:
   FORCE_COLOR: 3
@@ -30,7 +37,7 @@ jobs:
   check_build_trigger:
     name: Check build trigger
     runs-on: ubuntu-latest
-    if: github.repository == 'scikit-learn/scikit-learn'
+    # TEMPORARY: repository guard removed to test on a fork
     outputs:
       build: ${{ steps.check_build_trigger.outputs.build }}
     steps:
@@ -69,12 +76,19 @@ jobs:
         # context
         python: ["313", "314"]
     steps:
+      # TEMPORARY: the `simulate` steps and conditions below
+      - name: Simulate a failing build
+        if: inputs.simulate == 'fail'
+        run: exit 1
+
       - name: Checkout scikit-learn
+        if: inputs.simulate != 'pass'
         uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - uses: pypa/cibuildwheel@v4.3.5
+        if: inputs.simulate != 'pass'
         env:
           CIBW_PLATFORM: pyodide
           CIBW_BUILD: "cp${{ matrix.python }}-pyodide_wasm32"
@@ -86,6 +100,7 @@ jobs:
           CIBW_TEST_COMMAND: "python -m pytest -sra -p no:cacheprovider --pyargs sklearn --durations 20 --showlocals"
 
       - name: Upload wheel artifact
+        if: inputs.simulate != 'pass'
         uses: actions/upload-artifact@v7.0.2
         with:
           name: pyodide_wheel_cp${{ matrix.python }}
